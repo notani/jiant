@@ -260,9 +260,9 @@ register_task('edges-nonterminal-ontonotes',
 # Dependency edge labeling on English Web Treebank (UD).
 register_task('edges-dep-labeling-ewt', rel_path='edges/dep_ewt',
                label_file="labels.txt", files_by_split={
-                   'train': "train.edges.json",
-                   'val': "dev.edges.json",
-                   'test': "test.edges.json",
+                   'train': "edges.trainjson",
+                   'val': "edges.dev.json",
+                   'test': "edges.test.json",
                }, is_symmetric=False)(EdgeProbingTask)
 # Entity type labeling on OntoNotes.
 register_task('edges-ner-ontonotes',
@@ -297,9 +297,9 @@ register_task('edges-spr1', rel_path='edges/spr1',
 # SPR2, as an edge-labeling task (multilabel).
 register_task('edges-spr2', rel_path='edges/spr2',
                label_file="labels.txt", files_by_split={
-                   'train': "train.edges.json",
-                   'val': "dev.edges.json",
-                   'test': "test.edges.json",
+                   'train': "edges.train.json",
+                   'val': "edges.dev.json",
+                   'test': "edges.test.json",
                }, is_symmetric=False)(EdgeProbingTask)
 # Definite pronoun resolution. Two labels.
 register_task('edges-dpr', rel_path='edges/dpr',
@@ -369,4 +369,3 @@ register_task('edges-ccg-parse', rel_path='edges/ccg_parse',
                    'val': "ccg.parse.dev.json",
                    'test': "ccg.parse.test.json",
                }, single_sided=True)(EdgeProbingTask)
-
