@@ -30,7 +30,9 @@ from allennlp.data.fields import TextField, LabelField, \
 from ..allennlp_mods.numeric_field import NumericField
 
 from ..utils import utils
-from ..utils.utils import load_tsv, process_sentence, truncate, load_diagnostic_tsv
+from ..utils.utils import truncate
+from ..utils.data_loaders import load_tsv, process_sentence, load_diagnostic_tsv
+from ..utils.tokenizers import AVAILABLE_TOKENIZERS
 
 from typing import Iterable, Sequence, List, Dict, Any, Type
 
@@ -145,6 +147,10 @@ class Task(object):
             st = self.get_split_text(split)
             count = self.get_num_examples(st)
             self.example_counts[split] = count
+
+    def tokenizer_is_supported(self, tokenizer_name):
+        ''' Check if the tokenizer is supported for this task. '''
+        return tokenizer_name in AVAILABLE_TOKENIZERS.keys()
 
     @property
     def tokenizer_name(self):
@@ -439,7 +445,7 @@ class MultiNLISingleGenreTask(PairClassificationTask):
         '''Process the dataset located at path. We only use the in-genre matche data.'''
         targ_map = {'neutral': 0, 'entailment': 1, 'contradiction': 2}
 
-        tr_data = load_tsv(
+        tr_data = load_tsv(self._tokenizer_name,
             os.path.join(
                 path,
                 'train.tsv'),
@@ -454,7 +460,7 @@ class MultiNLISingleGenreTask(PairClassificationTask):
             filter_value=genre,
             tokenizer_name=self._tokenizer_name)
 
-        val_matched_data = load_tsv(
+        val_matched_data = load_tsv(self._tokenizer_name,
             os.path.join(
                 path,
                 'dev_matched.tsv'),
@@ -469,7 +475,7 @@ class MultiNLISingleGenreTask(PairClassificationTask):
             filter_value=genre,
             tokenizer_name=self._tokenizer_name)
 
-        te_matched_data = load_tsv(
+        te_matched_data = load_tsv(self._tokenizer_name,
             os.path.join(
                 path,
                 'test_matched.tsv'),
@@ -675,7 +681,7 @@ class MultiNLIDiagnosticTask(PairClassificationTask):
                 setattr(self, "scorer__%s__%s" % (tag_group, tag), scorer(arg_to_scorer))
 
         targ_map = {'neutral': 0, 'entailment': 1, 'contradiction': 2}
-        diag_data_dic = load_diagnostic_tsv(
+        diag_data_dic = load_diagnostic_tsv(self._tokenizer_name,
             os.path.join(
                 path,
                 'diagnostic-full.tsv'),
@@ -1410,15 +1416,12 @@ class CCGTaggingTask(TaggingTask):
         '''Process the dataset located at each data file.
            The target needs to be split into tokens because
            it is a sequence (one tag per input token). '''
-        tr_data = load_tsv(os.path.join(path, "ccg_1363.train"), max_seq_len,
-                           s1_idx=0, s2_idx=None, targ_idx=1, targ_fn=lambda t: t.split(' '),
-                           tokenizer_name=self._tokenizer_name)
-        val_data = load_tsv(os.path.join(path, "ccg_1363.dev"), max_seq_len,
-                            s1_idx=0, s2_idx=None, targ_idx=1, targ_fn=lambda t: t.split(' '),
-                            tokenizer_name=self._tokenizer_name)
-        te_data = load_tsv(os.path.join(path, 'ccg_1363.test'), max_seq_len,
-                           s1_idx=0, s2_idx=None, targ_idx=1, targ_fn=lambda t: t.split(' '),
-                           tokenizer_name=self._tokenizer_name)
+        tr_data = load_tsv(self._tokenizer_name, os.path.join(path, "ccg_1363.train"), max_seq_len,
+                           s1_idx=0, s2_idx=None, targ_idx=1, targ_fn=lambda t: t.split(' '))
+        val_data = load_tsv(self._tokenizer_name, os.path.join(path, "ccg_1363.dev"), max_seq_len,
+                            s1_idx=0, s2_idx=None, targ_idx=1, targ_fn=lambda t: t.split(' '))
+        te_data = load_tsv(self._tokenizer_name, os.path.join(path, 'ccg_1363.test'), max_seq_len,
+                           s1_idx=0, s2_idx=None, targ_idx=1, targ_fn=lambda t: t.split(' '))
         self.train_data_text = tr_data
         self.val_data_text = val_data
         self.test_data_text = te_data
