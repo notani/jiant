@@ -150,7 +150,7 @@ class Task(object):
 
     def tokenizer_is_supported(self, tokenizer_name):
         ''' Check if the tokenizer is supported for this task. '''
-        return tokenizer_name in AVAILABLE_TOKENIZERS.keys()
+        return tokenizer_name in AVAILABLE_TOKENIZERS.keys() or "bert" in tokenizer_name
 
     @property
     def tokenizer_name(self):

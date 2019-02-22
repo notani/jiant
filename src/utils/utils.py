@@ -11,9 +11,6 @@ import logging
 import codecs
 import time
 
-from nltk.tokenize.moses import MosesTokenizer, MosesDetokenizer
-from pytorch_pretrained_bert import BertTokenizer
-
 import numpy as np
 import torch
 from torch.autograd import Variable
@@ -31,7 +28,6 @@ from allennlp.common.params import Params
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 SOS_TOK, EOS_TOK = "<SOS>", "<EOS>"
-BERT_TOKENIZER = None # NOTE(Alex): hacky way of not loading the tokenizer every time
 BERT_CLS_TOK, BERT_SEP_TOK = "[CLS]", "[SEP]"
 
 # Note: using the full 'detokenize()' method is not recommended, since it does
