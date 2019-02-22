@@ -40,7 +40,7 @@ def build_trainer_params(args, task_names):
     extra_opts = ['sent_enc', 'd_hid', 'warmup',
                   'max_grad_norm', 'min_lr', 'batch_size',
                   'cuda', 'keep_all_checkpoints',
-                  'val_data_limit', 'training_data_fraction']
+                  'val_data_limit', 'max_epochs_per_task', 'training_data_fraction']
     for attr in train_opts:
         params[attr] = _get_task_attr(attr)
     for attr in extra_opts:
@@ -67,13 +67,14 @@ def build_trainer(params, model, run_dir, metric_should_decrease=True):
         and a scheduler config object.
     '''
 
+    opt_params = {'type': params['optimizer'], 'lr': params['lr']}
     if params['optimizer'] == 'adam':
         # AMSGrad is a flag variant of Adam, not its own object.
-        opt_params = Params({'type': params['optimizer'], 'lr': params['lr'],
-                             'weight_decay': 0, 'amsgrad': True})
-    else:
-        opt_params = Params({'type': params['optimizer'], 'lr': params['lr'],
-                             'weight_decay': 0})
+        opt_params['amsgrad'] = True
+    elif params['optimizer'] == 'bert_adam':
+        opt_params['t_total'] = -1
+        opt_params['warmup'] = 0.1
+    opt_params = Params(opt_params)
 
     if 'transformer' in params['sent_enc']:
         assert False, "Transformer is not yet tested, still in experimental stage :-("
@@ -100,6 +101,7 @@ def build_trainer(params, model, run_dir, metric_should_decrease=True):
                            'lr_decay': .99, 'min_lr': params['min_lr'],
                            'keep_all_checkpoints': params['keep_all_checkpoints'],
                            'val_data_limit': params['val_data_limit'],
+                           'max_epochs_per_task': params['max_epochs_per_task'],
                            'dec_val_scale': params['dec_val_scale'],
                            'training_data_fraction': params['training_data_fraction']})
     trainer = SamplingMultiTaskTrainer.from_params(model, run_dir,
@@ -111,7 +113,7 @@ class SamplingMultiTaskTrainer:
     def __init__(self, model, patience=2, val_interval=100, max_vals=50,
                  serialization_dir=None, cuda_device=-1,
                  grad_norm=None, grad_clipping=None, lr_decay=None, min_lr=None,
-                 keep_all_checkpoints=False, val_data_limit=5000,
+                 keep_all_checkpoints=False, val_data_limit=5000, max_epochs_per_task=-1,
                  dec_val_scale=100, training_data_fraction=1.0):
         """
         The training coordinator. Unusually complicated to handle MTL with tasks of
@@ -163,6 +165,7 @@ class SamplingMultiTaskTrainer:
         self._min_lr = min_lr
         self._keep_all_checkpoints = keep_all_checkpoints
         self._val_data_limit = val_data_limit
+        self._max_epochs_per_task = max_epochs_per_task
         self._dec_val_scale = dec_val_scale
         self._training_data_fraction = training_data_fraction
         self._task_infos = None
@@ -250,7 +253,6 @@ class SamplingMultiTaskTrainer:
                                       batch_size=batch_size,
                                       biggest_batch_first=True)
             tr_generator = iterator(task.train_data, num_epochs=None)
-            tr_generator = move_to_device(tr_generator, self._cuda_device)
             task_info['iterator'] = iterator
 
             if phase == "main":
@@ -272,6 +274,7 @@ class SamplingMultiTaskTrainer:
                 task_info['optimizer'], copy.deepcopy(scheduler_params))
             task_info['stopped'] = False
             task_info['last_log'] = time.time()
+
         # Metric bookkeeping
         all_metrics = [task.val_metric for task in tasks] + ['micro_avg', 'macro_avg']
         metric_infos = {metric: {'hist': [], 'stopped': False, 'best': (-1, {})} for
@@ -313,6 +316,9 @@ class SamplingMultiTaskTrainer:
                                                         optimizer_params, scheduler_params, phase)
 
         if shared_optimizer:  # if shared_optimizer, ignore task_specific optimizers
+            if self._max_epochs_per_task:
+                n_epoch_steps = sum([info["n_tr_batches"] for info in task_infos.values()])
+                optimizer_params["t_total"] = n_epoch_steps * self._max_epochs_per_task
             g_optimizer = Optimizer.from_params(train_params, copy.deepcopy(optimizer_params))
             g_scheduler = LearningRateScheduler.from_params(
                 g_optimizer, copy.deepcopy(scheduler_params))
@@ -445,7 +451,7 @@ class SamplingMultiTaskTrainer:
                 loss *= scaling_weights[task.name]
 
                 loss.backward()
-                assert_for_log(not torch.isnan(loss).any(), "NaNs in loss.")
+                #assert_for_log(not torch.isnan(loss).any(), "NaNs in loss.")
                 tr_loss += loss.data.cpu().numpy()
 
                 # Gradient regularization and application
@@ -591,7 +597,6 @@ class SamplingMultiTaskTrainer:
                 max_data_points = task.n_val_examples
             val_generator = BasicIterator(batch_size, instances_per_epoch=max_data_points)(
                 task.val_data, num_epochs=1, shuffle=False)
-            val_generator = move_to_device(val_generator, self._cuda_device)
             n_val_batches = math.ceil(max_data_points / batch_size)
             all_val_metrics["%s_loss" % task.name] = 0.0
 
@@ -699,6 +704,15 @@ class SamplingMultiTaskTrainer:
         ''' Check to see if should stop '''
         task_infos, metric_infos = self._task_infos, self._metric_infos
         g_optimizer = self._g_optimizer
+
+        if self._max_epochs_per_task > 0:
+            for task in tasks:
+                task_info = task_infos[task.name]
+                n_epochs_trained = task_info['total_batches_trained'] / task_info['n_tr_batches']
+                if n_epochs_trained >= self._max_epochs_per_task:
+                    log.info("Maximum batches trained on %s.", task.name)
+                    task_info['stopped'] = True
+
         if g_optimizer is None:
             stop_tr = True
             for task in tasks:
@@ -707,13 +721,14 @@ class SamplingMultiTaskTrainer:
                     log.info("Minimum lr hit on %s.", task.name)
                     task_info['stopped'] = True
                 stop_tr = stop_tr and task_info['stopped']
-                #stop_val = stop_val and metric_infos[task.val_metric]['stopped']
         else:
+            stop_tr = False
             if g_optimizer.param_groups[0]['lr'] < self._min_lr:
                 log.info("Minimum lr hit.")
                 stop_tr = True
-            else:
-                stop_tr = False
+            if min([info["stopped"] for info in task_infos.values()]):
+                log.info("Maximum batches trained on all tasks.")
+                stop_tr = True
 
         stop_val = metric_infos[stop_metric]['stopped']
 
@@ -973,6 +988,7 @@ class SamplingMultiTaskTrainer:
         min_lr = params.pop("min_lr", None)
         keep_all_checkpoints = params.pop("keep_all_checkpoints", False)
         val_data_limit = params.pop("val_data_limit", 5000)
+        max_epochs_per_task = params.pop("max_epochs_per_task", -1)
         dec_val_scale = params.pop("dec_val_scale", 100)
         training_data_fraction = params.pop("training_data_fraction", 1.0)
 
@@ -985,5 +1001,6 @@ class SamplingMultiTaskTrainer:
                                         min_lr=min_lr,
                                         keep_all_checkpoints=keep_all_checkpoints,
                                         val_data_limit=val_data_limit,
+                                        max_epochs_per_task=max_epochs_per_task,
                                         dec_val_scale=dec_val_scale,
                                         training_data_fraction=training_data_fraction)
