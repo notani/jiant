@@ -75,21 +75,13 @@ def process_single_pair_task_split(
     Returns:
         - instances (Iterable[Instance]): an iterable of AllenNLP Instances with fields
     '''
-    # check here if using bert to avoid passing model info to tasks
-    is_using_bert = "bert_wpm_pretokenized" in indexers
-
     def _make_instance(input1, input2, labels, idx):
         d = {}
+        d["input1"] = sentence_to_text_field(input1, indexers)
         d['sent1_str'] = MetadataField(" ".join(input1[1:-1]))
-        if is_using_bert and is_pair:
-            inp = input1 + input2[1:] # throw away input2 leading [CLS]
-            d["inputs"] = sentence_to_text_field(inp, indexers)
+        if input2:
+            d["input2"] = sentence_to_text_field(input2, indexers)
             d['sent2_str'] = MetadataField(" ".join(input2[1:-1]))
-        else:
-            d["input1"] = sentence_to_text_field(input1, indexers)
-            if input2:
-                d["input2"] = sentence_to_text_field(input2, indexers)
-                d['sent2_str'] = MetadataField(" ".join(input2[1:-1]))
         if classification:
             d["labels"] = LabelField(labels, label_namespace="labels",
                                      skip_indexing=True)
@@ -184,6 +176,7 @@ class Task(object):
 
     def __init__(self, name, tokenizer_name):
         self.name = name
+        assert self.tokenizer_is_supported(tokenizer_name)
         self._tokenizer_name = tokenizer_name
         self.scorers = []
 
@@ -702,7 +695,6 @@ class STSBTask(PairRegressionTask):
         #self.scorer2 = Average()
         self.scorer1 = Correlation("pearson")
         self.scorer2 = Correlation("spearman")
-        self.scorers = [self.scorer1, self.scorer2]
         self.val_metric = "%s_corr" % self.name
         self.val_metric_decreases = False
 
@@ -919,7 +911,6 @@ class MultiNLIDiagnosticTask(PairClassificationTask):
 
     def process_split(self, split, indexers) -> Iterable[Type[Instance]]:
         ''' Process split text into a list of AllenNLP Instances. '''
-        is_using_bert = "bert_wpm_pretokenized" in indexers
 
         def create_labels_from_tags(
                 fields_dict, ix_to_tag_dict, tag_arr, tag_group):
@@ -942,12 +933,8 @@ class MultiNLIDiagnosticTask(PairClassificationTask):
                            lex_sem, pr_ar_str, logic, knowledge):
             ''' from multiple types in one column create multiple fields '''
             d = {}
-            if is_using_bert:
-                inp = input1 + input2[1:] # drop the leading [CLS] token
-                d["inputs"] = sentence_to_text_field(inp, indexers)
-            else:
-                d["input1"] = sentence_to_text_field(input1, indexers)
-                d["input2"] = sentence_to_text_field(input2, indexers)
+            d["input1"] = sentence_to_text_field(input1, indexers)
+            d["input2"] = sentence_to_text_field(input2, indexers)
             d["labels"] = LabelField(label, label_namespace="labels",
                                      skip_indexing=True)
             d["idx"] = LabelField(idx, label_namespace="idx",
@@ -1051,6 +1038,83 @@ class RTETask(PairClassificationTask):
         self.test_data_text = te_data
         log.info("\tFinished loading RTE.")
 
+@register_task('jrte', rel_path='ja/RTE/')
+class jRTETask(PairClassificationTask):
+    ''' Task class for Recognizing Textual Entailment 1, 2, 3, 5 '''
+
+    def __init__(self, path, max_seq_len, name, **kw):
+        ''' '''
+        word_segmentation = kw.pop('word_segmentation')
+        assert word_segmentation in ['ipadic', 'unidic', 'spm']
+        spm_vocabsize = kw.pop('spm_vocabsize')  # {8000, 16000, 32000, None}
+        assert spm_vocabsize in ['8000', '16000', '32000', 'none']
+        path = os.path.join(path, word_segmentation)
+        if spm_vocabsize in ['8000', '16000', '32000']:
+            path = os.path.join(path, spm_vocabsize)
+        super(jRTETask, self).__init__(name, n_classes=2, **kw)
+        self.load_data(path, max_seq_len)
+        self.sentences = self.train_data_text[0] + self.train_data_text[1] + \
+            self.val_data_text[0] + self.val_data_text[1]
+
+    def load_data(self, path, max_seq_len):
+        ''' Process the datasets located at path. '''
+        targ_map = {"not_entailment": 0, "entailment": 1}
+        tr_data = load_tsv(self._tokenizer_name, os.path.join(path, 'train.tsv'), max_seq_len,
+                           label_fn=targ_map.__getitem__,
+                           s1_idx=1, s2_idx=2, label_idx=3, skip_rows=1)
+        val_data = load_tsv(self._tokenizer_name, os.path.join(path, 'dev.tsv'), max_seq_len,
+                            label_fn=targ_map.__getitem__,
+                            s1_idx=1, s2_idx=2, label_idx=3, skip_rows=1)
+        te_data = load_tsv(self._tokenizer_name, os.path.join(path, 'test.tsv'), max_seq_len,
+                           s1_idx=1, s2_idx=2, has_labels=False, return_indices=True, skip_rows=1)
+
+        self.train_data_text = tr_data
+        self.val_data_text = val_data
+        self.test_data_text = te_data
+        log.info("\tFinished loading jRTE.")
+
+@register_task('jdp', rel_path='ja/DP/')
+class jDPTask(PairClassificationTask):
+    ''' Task class for Discourse Parsing. '''
+
+    def __init__(self, path, max_seq_len, name, **kw):
+        ''' '''
+        word_segmentation = kw.pop('word_segmentation')
+        assert word_segmentation in ['ipadic', 'unidic', 'spm']
+        spm_vocabsize = kw.pop('spm_vocabsize')  # {8000, 16000, 32000, None}
+        assert spm_vocabsize in ['8000', '16000', '32000', 'none']
+        path = os.path.join(path, word_segmentation)
+        if spm_vocabsize in ['8000', '16000', '32000']:
+            path = os.path.join(path, spm_vocabsize)
+        super(jDPTask, self).__init__(name, n_classes=7, **kw)
+        self.load_data(path, max_seq_len)
+        self.sentences = self.train_data_text[0] + self.train_data_text[1] + \
+            self.val_data_text[0] + self.val_data_text[1]
+
+    def load_data(self, path, max_seq_len):
+        ''' Process the datasets located at path. '''
+        targ_map = {
+            'cause/reason': 0,
+            'concession': 1,
+            'condition': 2,
+            'contrast': 3,
+            'ground': 4,
+            'other': 5,
+            'purpose': 6
+        }
+        tr_data = load_tsv(self._tokenizer_name, os.path.join(path, 'train.tsv'), max_seq_len,
+                           label_fn=targ_map.__getitem__,
+                           s1_idx=1, s2_idx=2, label_idx=3, skip_rows=1)
+        val_data = load_tsv(self._tokenizer_name, os.path.join(path, 'dev.tsv'), max_seq_len,
+                            label_fn=targ_map.__getitem__,
+                            s1_idx=1, s2_idx=2, label_idx=3, skip_rows=1)
+        te_data = load_tsv(self._tokenizer_name, os.path.join(path, 'test.tsv'), max_seq_len,
+                           s1_idx=1, s2_idx=2, has_labels=False, return_indices=True, skip_rows=1)
+
+        self.train_data_text = tr_data
+        self.val_data_text = val_data
+        self.test_data_text = te_data
+        log.info("\tFinished loading jDP.")
 
 @register_task('qnli', rel_path='QNLI/')
 # second copy for different params
@@ -1104,6 +1168,38 @@ class WNLITask(PairClassificationTask):
         self.val_data_text = val_data
         self.test_data_text = te_data
         log.info("\tFinished loading Winograd.")
+
+
+@register_task('jwnli', rel_path='ja/WNLI/')
+class jWNLITask(PairClassificationTask):
+    '''Class for Winograd NLI task'''
+
+    def __init__(self, path, max_seq_len, name, **kw):
+        ''' '''
+        word_segmentation = kw.pop('word_segmentation')
+        assert word_segmentation in ['ipadic', 'unidic', 'spm']
+        spm_vocabsize = kw.pop('spm_vocabsize')  # {8000, 16000, 32000, None}
+        assert spm_vocabsize in ['8000', '16000', '32000', 'none']
+        path = os.path.join(path, word_segmentation)
+        if spm_vocabsize in ['8000', '16000', '32000']:
+            path = os.path.join(path, spm_vocabsize)
+        super(jWNLITask, self).__init__(name, n_classes=2, **kw)
+        self.load_data(path, max_seq_len)
+        self.sentences = self.train_data_text[0] + self.train_data_text[1] + \
+            self.val_data_text[0] + self.val_data_text[1]
+
+    def load_data(self, path, max_seq_len):
+        '''Load the data'''
+        tr_data = load_tsv(self._tokenizer_name, os.path.join(path, "train.tsv"), max_seq_len,
+                           s1_idx=1, s2_idx=2, label_idx=3, skip_rows=1)
+        val_data = load_tsv(self._tokenizer_name, os.path.join(path, "dev.tsv"), max_seq_len,
+                            s1_idx=1, s2_idx=2, label_idx=3, skip_rows=1)
+        te_data = load_tsv(self._tokenizer_name, os.path.join(path, 'test.tsv'), max_seq_len,
+                           s1_idx=1, s2_idx=2, has_labels=False, return_indices=True, skip_rows=1)
+        self.train_data_text = tr_data
+        self.val_data_text = val_data
+        self.test_data_text = te_data
+        log.info("\tFinished loading jWinograd.")
 
 
 @register_task('joci', rel_path='JOCI/')
@@ -1267,16 +1363,10 @@ class DisSentTask(PairClassificationTask):
 
     def process_split(self, split, indexers) -> Iterable[Type[Instance]]:
         ''' Process split text into a list of AllenNLP Instances. '''
-        is_using_bert = "bert_wpm_pretokenized" in indexers
-
         def _make_instance(input1, input2, labels):
             d = {}
-            if is_using_bert:
-                inp = input1 + input2[1:] # drop leading [CLS] token
-                d["inputs"] = sentence_to_text_field(inp, indexers)
-            else:
-                d["input1"] = sentence_to_text_field(input1, indexers)
-                d["input2"] = sentence_to_text_field(input2, indexers)
+            d["input1"] = sentence_to_text_field(input1, indexers)
+            d["input2"] = sentence_to_text_field(input2, indexers)
             d["labels"] = LabelField(labels, label_namespace="labels",
                                      skip_indexing=True)
             return Instance(d)

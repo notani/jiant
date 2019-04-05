@@ -39,7 +39,6 @@ from .tasks import REGISTRY as TASKS_REGISTRY
 from .tasks import ALL_GLUE_TASKS, ALL_NLI_PROBING_TASKS, ALL_TARG_VOC_TASKS
 from .tasks.mt import MTTask
 
-
 # NOTE: these are not that same as AllenNLP SOS, EOS tokens
 SOS_TOK, EOS_TOK = "<SOS>", "<EOS>"
 # NOTE: pad and unk tokens are created by AllenNLP vocabs by default
@@ -457,6 +456,9 @@ def _get_task(name, args, data_path, scratch_path):
             # TODO: remove special case, replace with something general
             # to pass custom loader args to task.
             task_kw['probe_path'] = args['nli-prob'].probe_path
+        if name.startswith('j'):  # Japanese tasks
+            task_kw['word_segmentation'] = args.word_segmentation
+            task_kw['spm_vocabsize'] = str(args.get('spm_vocabsize', 'none'))
         if name in ALL_TARG_VOC_TASKS:
             task_kw['max_targ_v_size'] = args.max_targ_word_v_size
         task_src_path = os.path.join(data_path, rel_path)
