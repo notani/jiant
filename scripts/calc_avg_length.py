@@ -23,7 +23,7 @@ for filename in listdir(args.dir_input):
     for col in df.columns:
         if not col.startswith('sentence'):
             continue
-        lengths += [len(s) for s in df[col].values]
+        lengths += [len(s.split()) for s in df[col].values]
 
 lengths = np.array(lengths)
 print(f'Text: {len(lengths)}')

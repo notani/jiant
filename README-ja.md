@@ -15,7 +15,7 @@ global_ro_exp_dir = <path to the experiment dir>
 
 ```shell
 source my_path_config.sh; python main.py --config_file config/jRTE.conf --overrides "exp_name = exp/ja/RTE/ipadic, run_name = 0, word_embs_file = vectors/ja/GloVe/ipadic/300d.txt, do_pretrain = 1, do_target_task_training = 0, word_segmentation = ipadic, cuda = 0"
-source my_path_config.sh; python main.py --config_file config/jRTE.conf --overrides "exp_name = exp/ja/RTE/unidic, run_name = 0, word_embs_file = vectors/ja/GloVe/unidic/300d.txt, do_pretrain = 1, do_target_task_training = 0, word_segmentation = unidic, cuda = 0"
+source my_path_config.sh; python main.py --config_file config/jRTE.conf --overrides "exp_name = exp/ja/RTE/unidic, run_name = 0, word_embs_file = vectors/ja/GloVe/unidic/300d.txt, do_pretrain = 1, do_target_task_training = 0, word_segmentation = unidic, cuda = 2"
 
 source my_path_config.sh; python main.py --config_file config/jRTE.conf --overrides "exp_name = exp/ja/RTE/spm/8000, run_name = 0, word_embs_file = vectors/ja/GloVe/spm/8000/300d.txt, do_pretrain = 1, do_target_task_training = 0, word_segmentation = spm, spm_vocabsize = 8000, cuda = 0"
 source my_path_config.sh; python main.py --config_file config/jRTE.conf --overrides "exp_name = exp/ja/RTE/spm/16000, run_name = 0, word_embs_file = vectors/ja/GloVe/spm/16000/300d.txt, do_pretrain = 1, do_target_task_training = 0, word_segmentation = spm, spm_vocabsize = 16000, cuda = 0"
@@ -75,27 +75,27 @@ python scripts/calc_avg_length.py data/ja/RTE/spm/32000
 Text: 10586
 
 ## unidic
-Max: 355, Min: 5
-Mean: 52.25552616663518, Std: 41.296737603836526
-Percentile[25, 50, 75]: [22. 38. 72.]
+Max: 137, Min: 2
+Mean: 19.85896467031929, Std: 15.633400622539677
+Percentile[25, 50, 75]: [ 9. 14. 27.]
 
 ## ipadic
-Max: 342, Min: 5
-Mean: 50.90950311732477, Std: 39.718872406446785
-Percentile[25, 50, 75]: [21. 37. 70.]
+Max: 126, Min: 2
+Mean: 18.51294162100888, Std: 14.130069472930266
+Percentile[25, 50, 75]: [ 8. 14. 25.]
 
 ## spm
-Max: 359, Min: 7
-Mean: 54.468921216701304, Std: 42.08559902725326
-Percentile[25, 50, 75]: [23. 40. 75.]
+Max: 144, Min: 4
+Mean: 22.00443982618553, Std: 16.265093242959594
+Percentile[25, 50, 75]: [10.   16.   29.75]
 
-Max: 339, Min: 7
-Mean: 51.658322312488195, Std: 39.766346139216246
-Percentile[25, 50, 75]: [22. 38. 71.]
+Max: 124, Min: 3
+Mean: 19.193840921972416, Std: 14.000574326389005
+Percentile[25, 50, 75]: [ 9. 14. 25.]
 
-Max: 328, Min: 7
-Mean: 49.611184583412054, Std: 38.228073051336736
-Percentile[25, 50, 75]: [21. 36. 68.]
+Max: 112, Min: 3
+Mean: 17.14670319289628, Std: 12.485121203202851
+Percentile[25, 50, 75]: [ 8. 13. 23.]
 ```
 
 ## WNLI
@@ -126,27 +126,27 @@ python scripts/calc_avg_length.py data/ja/WNLI/spm/32000
 Text: 7424
 
 ## unidic
-Max: 96, Min: 13
-Mean: 34.43790409482759, Std: 12.89349072789386
-Percentile[25, 50, 75]: [24. 32. 42.]
+Max: 34, Min: 5
+Mean: 12.632947198275861, Std: 4.58646547569171
+Percentile[25, 50, 75]: [ 9. 12. 15.]
 
 ## ipadic
-Max: 92, Min: 13
-Mean: 33.94005926724138, Std: 12.461613074860008
-Percentile[25, 50, 75]: [24. 31. 42.]
+Max: 34, Min: 5
+Mean: 12.135102370689655, Std: 4.258350890465767
+Percentile[25, 50, 75]: [ 9. 11. 15.]
 
 ## spm
-Max: 110, Min: 14
-Mean: 36.423626077586206, Std: 13.357519070952948
-Percentile[25, 50, 75]: [26. 34. 45.]
+Max: 43, Min: 6
+Mean: 14.625404094827585, Std: 5.022782803273753
+Percentile[25, 50, 75]: [11. 14. 18.]
 
-Max: 104, Min: 14
-Mean: 34.58364762931034, Std: 12.363435333535923
-Percentile[25, 50, 75]: [25. 32. 42.]
+Max: 37, Min: 5
+Mean: 12.785425646551724, Std: 4.09503193035602
+Percentile[25, 50, 75]: [10. 12. 15.]
 
-Max: 101, Min: 13
-Mean: 33.12068965517241, Std: 11.855564074491594
-Percentile[25, 50, 75]: [24. 31. 40.]
+Max: 34, Min: 4
+Mean: 11.322467672413794, Std: 3.5791920727101916
+Percentile[25, 50, 75]: [ 9. 11. 13.]
 ```
 
 ## DP
@@ -192,25 +192,25 @@ python scripts/calc_avg_length.py data/ja/DP/spm/32000
 Text: 114424
 
 ## unidic
-Max: 145, Min: 2
-Mean: 35.066087534083756, Std: 17.625382639141353
-Percentile[25, 50, 75]: [22. 32. 45.]
+Max: 61, Min: 1
+Mean: 13.222715514227785, Std: 6.713874119550587
+Percentile[25, 50, 75]: [ 8. 12. 17.]
 
 ## ipadic
-Text: 114424
-Max: 140, Min: 2
-Mean: 34.60247850101377, Std: 17.29617680569224
+Max: 56, Min: 1
+Mean: 12.759106481157799, Std: 6.4151156738313455
+Percentile[25, 50, 75]: [ 8. 12. 16.]
 
 ## spm
-Max: 156, Min: 3
-Mean: 37.51599314829057, Std: 18.3348060154627
-Percentile[25, 50, 75]: [24. 34. 48.]
+Max: 67, Min: 1
+Mean: 15.66875830245403, Std: 7.43903140587066
+Percentile[25, 50, 75]: [10. 14. 20.]
 
-Max: 147, Min: 3
-Mean: 35.45230021673775, Std: 17.333206916280027
-Percentile[25, 50, 75]: [23. 33. 45.]
+Max: 57, Min: 1
+Mean: 13.60506537090121, Std: 6.491419551403433
+Percentile[25, 50, 75]: [ 9. 13. 17.]
 
-Max: 140, Min: 3
-Mean: 34.02475005243655, Std: 16.646029929556107
-Percentile[25, 50, 75]: [22. 31. 43.]
+Max: 53, Min: 1
+Mean: 12.177515206600013, Std: 5.8100769581200264
+Percentile[25, 50, 75]: [ 8. 11. 15.]
 ```
