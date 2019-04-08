@@ -3,6 +3,7 @@
 
 # Show document lengths
 
+from csv import DictReader
 from os import listdir
 from os import path
 import argparse
@@ -19,11 +20,14 @@ for filename in listdir(args.dir_input):
     path_input = path.join(args.dir_input, filename)
     print(f'Read {path_input}')
     sep = '\t' if path_input.endswith('.tsv') else ','
-    df = pd.read_csv(path_input, sep=sep)
-    for col in df.columns:
-        if not col.startswith('sentence'):
-            continue
-        lengths += [len(s.split()) for s in df[col].values]
+    with open(path_input) as f:
+        header = f.readline().strip().split(sep)
+        cols = [i for i, col in enumerate(header)
+                if col.startswith('sentence')]
+        for line in f:
+            row = line.strip().split(sep)
+            for i in cols:
+                lengths.append(len(row[i].split(' ')))
 
 lengths = np.array(lengths)
 print(f'Text: {len(lengths)}')

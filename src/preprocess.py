@@ -459,6 +459,7 @@ def _get_task(name, args, data_path, scratch_path):
         if name.startswith('j'):  # Japanese tasks
             task_kw['word_segmentation'] = args.word_segmentation
             task_kw['spm_vocabsize'] = str(args.get('spm_vocabsize', 'none'))
+            task_kw['jsaa_domain'] = str(args.get('jsaa_domain', 'none'))
         if name in ALL_TARG_VOC_TASKS:
             task_kw['max_targ_v_size'] = args.max_targ_word_v_size
         task_src_path = os.path.join(data_path, rel_path)

@@ -408,6 +408,39 @@ class SSTTask(SingleClassificationTask):
         log.info("\tFinished loading SST data.")
 
 
+@register_task('jsaa', rel_path='ja/SAA')
+class JSAATask(SingleClassificationTask):
+    ''' Task class for Japanese Sentiment Analysis dataset from Amazon. '''
+
+    def __init__(self, path, max_seq_len, name, **kw):
+        ''' '''
+        domain = kw.pop('jsaa_domain')
+        assert domain in ['books', 'dvd', 'music']
+        word_segmentation = kw.pop('word_segmentation')
+        assert word_segmentation in ['ipadic', 'unidic', 'spm']
+        spm_vocabsize = kw.pop('spm_vocabsize')  # {8000, 16000, 32000, None}
+        assert spm_vocabsize in ['8000', '16000', '32000', 'none']
+        path = os.path.join(os.path.join(path, domain), word_segmentation)
+        if spm_vocabsize in ['8000', '16000', '32000']:
+            path = os.path.join(path, spm_vocabsize)
+        super(JSAATask, self).__init__(name, n_classes=2, **kw)
+        self.load_data(path, max_seq_len)
+        self.sentences = self.train_data_text[0] + self.val_data_text[0]
+
+    def load_data(self, path, max_seq_len):
+        ''' Load data '''
+        tr_data = load_tsv(self._tokenizer_name, os.path.join(path, 'train.tsv'), max_seq_len,
+                           s1_idx=0, s2_idx=None, label_idx=1, skip_rows=1)
+        val_data = load_tsv(self._tokenizer_name, os.path.join(path, 'dev.tsv'), max_seq_len,
+                            s1_idx=0, s2_idx=None, label_idx=1, skip_rows=1)
+        te_data = load_tsv(self._tokenizer_name, os.path.join(path, 'test.tsv'), max_seq_len,
+                           s1_idx=0, s2_idx=None, has_labels=False, return_indices=True, skip_rows=1)
+        self.train_data_text = tr_data
+        self.val_data_text = val_data
+        self.test_data_text = te_data
+        log.info("\tFinished loading jSAA data.")
+
+
 @register_task('cola', rel_path='CoLA/')
 class CoLATask(SingleClassificationTask):
     '''Class for Warstdadt acceptability task'''
