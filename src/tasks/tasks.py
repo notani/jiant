@@ -1099,7 +1099,8 @@ class jRTETask(PairClassificationTask):
                             label_fn=targ_map.__getitem__,
                             s1_idx=1, s2_idx=2, label_idx=3, skip_rows=1)
         te_data = load_tsv(self._tokenizer_name, os.path.join(path, 'test.tsv'), max_seq_len,
-                           s1_idx=1, s2_idx=2, has_labels=False, return_indices=True, skip_rows=1)
+                           label_fn=targ_map.__getitem__,
+                           s1_idx=1, s2_idx=2, label_idx=3, skip_rows=1)
 
         self.train_data_text = tr_data
         self.val_data_text = val_data
@@ -1142,7 +1143,8 @@ class jDPTask(PairClassificationTask):
                             label_fn=targ_map.__getitem__,
                             s1_idx=1, s2_idx=2, label_idx=3, skip_rows=1)
         te_data = load_tsv(self._tokenizer_name, os.path.join(path, 'test.tsv'), max_seq_len,
-                           s1_idx=1, s2_idx=2, has_labels=False, return_indices=True, skip_rows=1)
+                           label_fn=targ_map.__getitem__,
+                           s1_idx=1, s2_idx=2, label_idx=3, skip_rows=1)
 
         self.train_data_text = tr_data
         self.val_data_text = val_data
@@ -1228,7 +1230,7 @@ class jWNLITask(PairClassificationTask):
         val_data = load_tsv(self._tokenizer_name, os.path.join(path, "dev.tsv"), max_seq_len,
                             s1_idx=1, s2_idx=2, label_idx=3, skip_rows=1)
         te_data = load_tsv(self._tokenizer_name, os.path.join(path, 'test.tsv'), max_seq_len,
-                           s1_idx=1, s2_idx=2, has_labels=False, return_indices=True, skip_rows=1)
+                           s1_idx=1, s2_idx=2, label_idx=3, skip_rows=1)
         self.train_data_text = tr_data
         self.val_data_text = val_data
         self.test_data_text = te_data

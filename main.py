@@ -113,18 +113,24 @@ def get_best_checkpoint_path(run_dir):
 def evaluate_and_write(args, model, tasks, splits_to_write):
     """ Evaluate a model on dev and/or test, then write predictions """
     val_results, val_preds = evaluate.evaluate(model, tasks, args.batch_size, args.cuda, "val")
+    te_results, te_preds = evaluate.evaluate(model, tasks, args.batch_size, args.cuda, "test")
+
+    run_name = args.get("run_name", os.path.basename(args.run_dir))
+    val_results_tsv = os.path.join(args.exp_dir, "val_results.tsv")
+    te_results_tsv = os.path.join(args.exp_dir, "test_results.tsv")
+    log.info("Writing results for split 'val' to %s", val_results_tsv)
+    evaluate.write_results(val_results, val_results_tsv, run_name=run_name)
+    log.info("Writing results for split 'test' to %s", te_results_tsv)
+    evaluate.write_results(te_results, te_results_tsv, run_name=run_name)
+
+    # No use in JA tasks.
     if 'val' in splits_to_write:
         evaluate.write_preds(tasks, val_preds, args.run_dir, 'val',
                              strict_glue_format=args.write_strict_glue_format)
     if 'test' in splits_to_write:
-        _, te_preds = evaluate.evaluate(model, tasks, args.batch_size, args.cuda, "test")
         evaluate.write_preds(tasks, te_preds, args.run_dir, 'test',
                              strict_glue_format=args.write_strict_glue_format)
-    run_name = args.get("run_name", os.path.basename(args.run_dir))
 
-    results_tsv = os.path.join(args.exp_dir, "results.tsv")
-    log.info("Writing results for split 'val' to %s", results_tsv)
-    evaluate.write_results(val_results, results_tsv, run_name=run_name)
 
 
 def main(cl_arguments):
