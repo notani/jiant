@@ -16,6 +16,7 @@ global_ro_exp_dir = <path to the experiment dir>
 ```shell
 source my_path_config.sh; python main.py --config_file config/jRTE.conf --overrides "exp_name = exp/ja/RTE/ipadic, run_name = 0, word_embs_file = vectors/ja/GloVe/ipadic/300d.txt, do_pretrain = 1, do_target_task_training = 0, word_segmentation = ipadic, cuda = 0"
 source my_path_config.sh; python main.py --config_file config/jRTE.conf --overrides "exp_name = exp/ja/RTE/unidic, run_name = 0, word_embs_file = vectors/ja/GloVe/unidic/300d.txt, do_pretrain = 1, do_target_task_training = 0, word_segmentation = unidic, cuda = 2"
+source my_path_config.sh; python main.py --config_file config/jRTE.conf --overrides "exp_name = exp/ja/RTE/jumanpp, run_name = 0, word_embs_file = vectors/ja/GloVe/jumanpp/300d.txt, do_pretrain = 1, do_target_task_training = 0, word_segmentation = jumanpp, cuda = 2"
 
 source my_path_config.sh; python main.py --config_file config/jRTE.conf --overrides "exp_name = exp/ja/RTE/spm/8000, run_name = 0, word_embs_file = vectors/ja/GloVe/spm/8000/300d.txt, do_pretrain = 1, do_target_task_training = 0, word_segmentation = spm, spm_vocabsize = 8000, cuda = 0"
 source my_path_config.sh; python main.py --config_file config/jRTE.conf --overrides "exp_name = exp/ja/RTE/spm/16000, run_name = 0, word_embs_file = vectors/ja/GloVe/spm/16000/300d.txt, do_pretrain = 1, do_target_task_training = 0, word_segmentation = spm, spm_vocabsize = 16000, cuda = 0"
@@ -55,6 +56,17 @@ source my_path_config.sh; python main.py --config_file config/jSAA.conf --overri
 source my_path_config.sh; python main.py --config_file config/jSAA.conf --overrides "exp_name = exp/ja/SAA/spm/32000, run_name = 0, word_embs_file = vectors/ja/GloVe/spm/32000/300d.txt, do_pretrain = 1, do_target_task_training = 0, word_segmentation = spm, spm_vocabsize = 32000, jsaa_domain = books, cuda = 0"
 ```
 
+# jSAR
+
+```shell
+source my_path_config.sh; python main.py --config_file config/jSAR.conf --overrides "exp_name = exp/ja/SAR/ipadic, run_name = 0, word_embs_file = vectors/ja/GloVe/ipadic/300d.txt, do_pretrain = 1, do_target_task_training = 0, word_segmentation = ipadic, jsar_class = 2, cuda = 0"
+source my_path_config.sh; python main.py --config_file config/jSAR.conf --overrides "exp_name = exp/ja/SAR/unidic, run_name = 0, word_embs_file = vectors/ja/GloVe/unidic/300d.txt, do_pretrain = 1, do_target_task_training = 0, word_segmentation = unidic, jsar_class = 2, cuda = 0"
+source my_path_config.sh; python main.py --config_file config/jSAR.conf --overrides "exp_name = exp/ja/SAR/jumanpp, run_name = 0, word_embs_file = vectors/ja/GloVe/jumanpp/300d.txt, do_pretrain = 1, do_target_task_training = 0, word_segmentation = jumanpp, jsar_class = 2, cuda = 0"
+source my_path_config.sh; python main.py --config_file config/jSAR.conf --overrides "exp_name = exp/ja/SAR/spm/8000, run_name = 0, word_embs_file = vectors/ja/GloVe/spm/8000/300d.txt, do_pretrain = 1, do_target_task_training = 0, word_segmentation = spm, spm_vocabsize = 8000, jsar_class = 2, cuda = 0"
+source my_path_config.sh; python main.py --config_file config/jSAR.conf --overrides "exp_name = exp/ja/SAR/spm/16000, run_name = 0, word_embs_file = vectors/ja/GloVe/spm/16000/300d.txt, do_pretrain = 1, do_target_task_training = 0, word_segmentation = spm, spm_vocabsize = 16000, jsar_class = 2, cuda = 0"
+source my_path_config.sh; python main.py --config_file config/jSAR.conf --overrides "exp_name = exp/ja/SAR/spm/32000, run_name = 0, word_embs_file = vectors/ja/GloVe/spm/32000/300d.txt, do_pretrain = 1, do_target_task_training = 0, word_segmentation = spm, spm_vocabsize = 32000, jsar_class = 2, cuda = 0"
+```
+
 
 # Data Statistics
 
@@ -77,38 +89,19 @@ source my_path_config.sh; python main.py --config_file config/jSAA.conf --overri
     
     
 # Text length (# of tokens)
-
-python scripts/calc_avg_length.py data/ja/RTE/unidic/
-python scripts/calc_avg_length.py data/ja/RTE/ipadic/
-python scripts/calc_avg_length.py data/ja/RTE/spm/8000
-python scripts/calc_avg_length.py data/ja/RTE/spm/16000
-python scripts/calc_avg_length.py data/ja/RTE/spm/32000
-
-Text: 10586
-
-## unidic
-Max: 137, Min: 2
-Mean: 19.85896467031929, Std: 15.633400622539677
-Percentile[25, 50, 75]: [ 9. 14. 27.]
-
-## ipadic
-Max: 126, Min: 2
-Mean: 18.51294162100888, Std: 14.130069472930266
-Percentile[25, 50, 75]: [ 8. 14. 25.]
-
-## spm
-Max: 144, Min: 4
-Mean: 22.00443982618553, Std: 16.265093242959594
-Percentile[25, 50, 75]: [10.   16.   29.75]
-
-Max: 124, Min: 3
-Mean: 19.193840921972416, Std: 14.000574326389005
-Percentile[25, 50, 75]: [ 9. 14. 25.]
-
-Max: 112, Min: 3
-Mean: 17.14670319289628, Std: 12.485121203202851
-Percentile[25, 50, 75]: [ 8. 13. 23.]
+python scripts/calc_avg_length_all.py data/ja/RTE/
 ```
+
+Name|Text|Mean|Std|Min|25%|50%|75%|Max
+-|-|-|-|-|-|-|-|-
+jumanpp|10586|17.844133761571886|14.121409610935777|2|8.0|13.0|24.0|126
+unidic|10586|20.8597203854147|15.633546398068882|3|10.0|15.0|28.0|138
+spm-8000|10586|22.00443982618553|16.265093242959594|4|10.0|16.0|29.75|144
+spm-16000|10586|19.193840921972416|14.000574326389003|3|9.0|14.0|25.0|124
+spm-32000|10586|17.14670319289628|12.485121203202851|3|8.0|13.0|23.0|112
+sudachi|10586|18.44247118836199|14.151662475393753|2|8.0|14.0|25.0|121
+ipadic|10586|19.51369733610429|14.1302091521189|3|9.0|15.0|26.0|127
+
 
 ## WNLI
 
@@ -128,38 +121,19 @@ Percentile[25, 50, 75]: [ 8. 13. 23.]
     552 0
     
 # Text length (# of tokens)
-
-python scripts/calc_avg_length.py data/ja/WNLI/unidic/
-python scripts/calc_avg_length.py data/ja/WNLI/ipadic/
-python scripts/calc_avg_length.py data/ja/WNLI/spm/8000
-python scripts/calc_avg_length.py data/ja/WNLI/spm/16000
-python scripts/calc_avg_length.py data/ja/WNLI/spm/32000
-
-Text: 7424
-
-## unidic
-Max: 34, Min: 5
-Mean: 12.632947198275861, Std: 4.58646547569171
-Percentile[25, 50, 75]: [ 9. 12. 15.]
-
-## ipadic
-Max: 34, Min: 5
-Mean: 12.135102370689655, Std: 4.258350890465767
-Percentile[25, 50, 75]: [ 9. 11. 15.]
-
-## spm
-Max: 43, Min: 6
-Mean: 14.625404094827585, Std: 5.022782803273753
-Percentile[25, 50, 75]: [11. 14. 18.]
-
-Max: 37, Min: 5
-Mean: 12.785425646551724, Std: 4.09503193035602
-Percentile[25, 50, 75]: [10. 12. 15.]
-
-Max: 34, Min: 4
-Mean: 11.322467672413794, Std: 3.5791920727101916
-Percentile[25, 50, 75]: [ 9. 11. 13.]
+python scripts/calc_avg_length_all.py data/ja/WNLI/
 ```
+
+Name|Text|Mean|Std|Min|25%|50%|75%|Max
+-|-|-|-|-|-|-|-|-
+jumanpp|7424|11.203394396551724|4.222286583749785|4|8.0|10.0|14.0|29
+unidic|7424|13.636449353448276|4.587625327215494|6|10.0|13.0|16.0|35
+spm-8000|7424|14.625404094827585|5.022782803273753|6|11.0|14.0|18.0|43
+spm-16000|7424|12.785425646551724|4.09503193035602|5|10.0|12.0|15.0|37
+spm-32000|7424|11.322467672413794|3.5791920727101916|4|9.0|11.0|13.0|34
+sudachi|7424|12.234240301724139|4.3459264287550505|5|9.0|11.0|15.0|34
+ipadic|7424|13.13860452586207|4.259882904845714|6|10.0|12.0|16.0|35
+
 
 ## DP
 
@@ -194,38 +168,18 @@ Percentile[25, 50, 75]: [ 9. 11. 13.]
       8 concession
       
 # Text length (# of tokens)
-
-python scripts/calc_avg_length.py data/ja/DP/unidic/
-python scripts/calc_avg_length.py data/ja/DP/ipadic/
-python scripts/calc_avg_length.py data/ja/DP/spm/8000
-python scripts/calc_avg_length.py data/ja/DP/spm/16000
-python scripts/calc_avg_length.py data/ja/DP/spm/32000
-
-Text: 114424
-
-## unidic
-Max: 61, Min: 1
-Mean: 13.222715514227785, Std: 6.713874119550587
-Percentile[25, 50, 75]: [ 8. 12. 17.]
-
-## ipadic
-Max: 56, Min: 1
-Mean: 12.759106481157799, Std: 6.4151156738313455
-Percentile[25, 50, 75]: [ 8. 12. 16.]
-
-## spm
-Max: 67, Min: 1
-Mean: 15.66875830245403, Std: 7.43903140587066
-Percentile[25, 50, 75]: [10. 14. 20.]
-
-Max: 57, Min: 1
-Mean: 13.60506537090121, Std: 6.491419551403433
-Percentile[25, 50, 75]: [ 9. 13. 17.]
-
-Max: 53, Min: 1
-Mean: 12.177515206600013, Std: 5.8100769581200264
-Percentile[25, 50, 75]: [ 8. 11. 15.]
+python scripts/calc_avg_length_all.py data/ja/DP/
 ```
+
+Name|Text|Mean|Std|Min|25%|50%|75%|Max
+-|-|-|-|-|-|-|-|-
+jumanpp|114424|11.999632944137593|6.159068279974928|1|7.0|11.0|16.0|53
+unidic|114424|14.222715514227785|6.713874119550589|2|9.0|13.0|18.0|62
+spm-8000|114424|15.66875830245403|7.439031405870661|1|10.0|14.0|20.0|67
+spm-16000|114424|13.60506537090121|6.491419551403433|1|9.0|13.0|17.0|57
+spm-32000|114424|12.177515206600013|5.810076958120026|1|8.0|11.0|15.0|53
+sudachi|114424|12.580018178004615|6.204950454065117|1|8.0|12.0|16.0|50
+ipadic|114424|13.759106481157799|6.4151156738313455|2|9.0|13.0|17.0|57
 
 
 ## SAA (sentiment analysis amazon)
@@ -249,38 +203,18 @@ Percentile[25, 50, 75]: [ 8. 11. 15.]
    1000 1
 
 # Text length (# of tokens)
-python scripts/calc_avg_length.py data/ja/SAA/books/unidic/
-python scripts/calc_avg_length.py data/ja/SAA/books/ipadic/
-python scripts/calc_avg_length.py data/ja/SAA/books/spm/8000
-python scripts/calc_avg_length.py data/ja/SAA/books/spm/16000
-python scripts/calc_avg_length.py data/ja/SAA/books/spm/32000
-
-
-Text: 4000
-
-## unidic
-Max: 2163, Min: 4
-Mean: 164.554, Std: 125.89941653558209
-Percentile[25, 50, 75]: [ 84. 130. 210.]
-
-## ipadic
-Max: 1875, Min: 4
-Mean: 157.63725, Std: 118.7681719251311
-Percentile[25, 50, 75]: [ 80.  125.5 201. ]
-
-## spm
-Max: 2748, Min: 4
-Mean: 180.58575, Std: 138.68836521834663
-Percentile[25, 50, 75]: [ 93. 144. 228.]
-
-Max: 2433, Min: 3
-Mean: 156.57825, Std: 120.89711897699424
-Percentile[25, 50, 75]: [ 81. 125. 197.]
-
-Max: 2173, Min: 3
-Mean: 140.1215, Std: 108.3927291738242
-Percentile[25, 50, 75]: [ 72. 111. 177.]
+python scripts/calc_avg_length_all.py data/ja/SAA/books/
 ```
+
+Name|Text|Mean|Std|Min|25%|50%|75%|Max
+-|-|-|-|-|-|-|-|-
+jumanpp|4000|139.85825|110.82537686350315|1|69.0|111.0|180.0|1783
+unidic|4000|164.554|125.89941653558209|4|84.0|130.0|210.0|2163
+spm-8000|4000|180.58575|138.68836521834663|4|93.0|144.0|228.0|2748
+spm-16000|4000|156.57825|120.89711897699424|3|81.0|125.0|197.0|2433
+spm-32000|4000|140.1215|108.3927291738242|3|72.0|111.0|177.0|2173
+sudachi|4000|159.09525|120.73935223214302|3|80.0|126.0|203.0|1885
+ipadic|4000|157.63725|118.7681719251311|4|80.0|125.5|201.0|1875
 
 ### DVD
 
@@ -301,38 +235,18 @@ Percentile[25, 50, 75]: [ 72. 111. 177.]
    1000 1
 
 # Text length (# of tokens)
-python scripts/calc_avg_length.py data/ja/SAA/dvd/unidic/
-python scripts/calc_avg_length.py data/ja/SAA/dvd/ipadic/
-python scripts/calc_avg_length.py data/ja/SAA/dvd/spm/8000
-python scripts/calc_avg_length.py data/ja/SAA/dvd/spm/16000
-python scripts/calc_avg_length.py data/ja/SAA/dvd/spm/32000
-
-
-Text: 4000
-
-## unidic
-Max: 2196, Min: 5
-Mean: 159.53925, Std: 121.88970202374563
-Percentile[25, 50, 75]: [ 79. 126. 208.]
-
-## ipadic
-Max: 2080, Min: 5
-Mean: 152.2935, Std: 115.8189097589422
-Percentile[25, 50, 75]: [ 75.   120.   197.25]
-
-## spm
-Max: 2317, Min: 11
-Mean: 181.68, Std: 137.49596030429404
-Percentile[25, 50, 75]: [ 90. 144. 235.]
-
-Max: 2046, Min: 10
-Mean: 157.4715, Std: 119.89147045453234
-Percentile[25, 50, 75]: [ 78. 124. 203.]
-
-Max: 1810, Min: 9
-Mean: 140.94175, Std: 107.5998181082919
-Percentile[25, 50, 75]: [ 70. 111. 181.]
+python scripts/calc_avg_length_all.py data/ja/SAA/dvd/
 ```
+
+Name|Text|Mean|Std|Min|25%|50%|75%|Max
+-|-|-|-|-|-|-|-|-
+jumanpp|4000|133.63825|110.33380437081603|1|61.0|103.0|176.0|1706
+unidic|4000|159.53925|121.88970202374563|5|79.0|126.0|208.0|2196
+spm-8000|4000|181.68|137.49596030429404|11|90.0|144.0|235.0|2317
+spm-16000|4000|157.4715|119.89147045453234|10|78.0|124.0|203.0|2046
+spm-32000|4000|140.94175|107.5998181082919|9|70.0|111.0|181.0|1810
+sudachi|4000|153.628|116.95348697666094|4|75.0|121.0|201.0|2085
+ipadic|4000|152.2935|115.8189097589422|5|75.0|120.0|197.25|2080
 
 ### Music
 
@@ -353,35 +267,86 @@ Percentile[25, 50, 75]: [ 70. 111. 181.]
    1000 1
 
 # Text length (# of tokens)
-python scripts/calc_avg_length.py data/ja/SAA/music/unidic/
-python scripts/calc_avg_length.py data/ja/SAA/music/ipadic/
-python scripts/calc_avg_length.py data/ja/SAA/music/spm/8000
-python scripts/calc_avg_length.py data/ja/SAA/music/spm/16000
-python scripts/calc_avg_length.py data/ja/SAA/music/spm/32000
-
-
-Text: 4000
-
-## unidic
-Max: 1042, Min: 8
-Mean: 138.93375, Std: 104.7191212765725
-Percentile[25, 50, 75]: [ 69. 109. 179.]
-
-## ipadic
-Max: 995, Min: 8
-Mean: 130.52, Std: 98.19884215203355
-Percentile[25, 50, 75]: [ 65.   102.   168.25]
-
-## spm
-Max: 1114, Min: 9
-Mean: 160.116, Std: 118.75162754253097
-Percentile[25, 50, 75]: [ 81. 126. 205.]
-
-Max: 1004, Min: 9
-Mean: 138.79375, Std: 103.02583030938163
-Percentile[25, 50, 75]: [ 70. 109. 179.]
-
-Max: 896, Min: 7
-Mean: 123.859, Std: 91.7921054285171
-Percentile[25, 50, 75]: [ 63.  98. 159.]
+python scripts/calc_avg_length_all.py data/ja/SAA/music/
 ```
+
+Name|Text|Mean|Std|Min|25%|50%|75%|Max
+-|-|-|-|-|-|-|-|-
+jumanpp|4000|113.44475|92.87286443002337|1|52.0|89.0|150.0|916
+unidic|4000|138.93375|104.7191212765725|8|69.0|109.0|179.0|1042
+spm-8000|4000|160.116|118.75162754253097|9|81.0|126.0|205.0|1114
+spm-16000|4000|138.79375|103.02583030938163|9|70.0|109.0|179.0|1004
+spm-32000|4000|123.859|91.7921054285171|7|63.0|98.0|159.0|896
+sudachi|4000|131.85525|99.52674664349027|6|65.0|103.0|171.0|1015
+ipadic|4000|130.52|98.19884215203355|8|65.0|102.0|168.25|995
+
+
+## SAR (sentiment analysis rakuten)
+
+`data/ja/SAR-2` and `data/ja/SAR-5`
+
+```shell
+==SAR-2==
+
+# train.tsv: 1453723
+ 690081 0
+ 763642 1
+
+# dev.tsv: 2000
+    940 0
+   1060 1
+      
+# test.tsv: 1420
+    696 0
+    713 1
+    
+==SAR-5==
+
+# train.tsv: 1819704
+ 335368 1
+ 354872 2
+ 365591 3
+ 373941 4
+ 389932 5
+
+# dev.tsv: 2000
+    366 1
+    415 2
+    390 3
+    368 4
+    461 5
+      
+# test.tsv: 1473
+    344 1
+    352 2
+     63 3
+    315 4
+    398 5
+
+# Text length (# of tokens)
+python scripts/calc_avg_length_all.py data/ja/SAR-2
+```
+
+__SAR-2__
+
+Name|Text|Mean|Std|Min|25%|50%|75%|Max
+-|-|-|-|-|-|-|-|-
+jumanpp|1457132|41.19068416588202|11.742632808293994|5|32.0|40.0|49.0|104
+unidic|1457132|48.55201656404499|13.193451026688848|12|38.0|47.0|58.0|108
+spm-8000|1457132|56.64820277092261|15.001360109399181|21|45.0|54.0|67.0|121
+spm-16000|1457132|49.055283941331325|13.195766454104424|18|39.0|47.0|58.0|113
+spm-32000|1457132|44.20342700592671|11.962153882737852|15|35.0|43.0|53.0|103
+sudachi|1457132|46.34754847192979|12.838195279879898|7|36.0|45.0|55.0|100
+ipadic|1457132|46.7410481685942|12.756433223590845|12|37.0|45.0|56.0|99
+
+__SAR-5__
+
+Name|Text|Mean|Std|Min|25%|50%|75%|Max
+-|-|-|-|-|-|-|-|-
+jumanpp|1823176|41.06227923140717|11.702974748528234|5|32.0|39.0|49.0|106
+unidic|1823176|48.38837446302496|13.144836993942738|9|38.0|46.0|58.0|108
+spm-8000|1823176|56.39616800572188|14.96102535249125|21|44.0|54.0|67.0|121
+spm-16000|1823176|48.826825824824375|13.15298633003055|18|38.0|47.0|58.0|113
+spm-32000|1823176|43.99201174214667|11.92272028248654|15|35.0|42.0|52.0|103
+sudachi|1823176|46.20736176869375|12.794897921529376|5|36.0|44.0|55.0|100
+ipadic|1823176|46.57348769400212|12.708009041393513|9|36.0|45.0|55.0|99
